@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 from typing import Dict, Any
 import pandas as pd
 from langchain_core.tools import tool
-from app.config import DB_PATH
+from app.core.config import DB_PATH
 
 def _week_bounds(now_local: datetime):
     start = (now_local - timedelta(days=now_local.weekday())).replace(hour=0, 

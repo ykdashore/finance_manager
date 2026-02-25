@@ -4,24 +4,23 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 import sqlite3
-from app.state import FinanceState
-from app.prompts import SYSTEM_PROMPT
+import os
+from app.core.state import FinanceState
+from app.core.prompts import SYSTEM_PROMPT
 from app.tools import ALL_TOOLS
 from app.tools.store import init_db
-from app.config import *
-# from google.oauth2 import service_account
+from app.core.config import *
 from langchain_google_genai import ChatGoogleGenerativeAI
-from app.config import GOOGLE_APPLICATION_CREDENTIALS_PATH
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
 
 
 def _agent_model():
     return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash", 
-        vertexai=True,           
-        project="agenticaiprep", 
-        location="us-central1",  
+        model=LLM_ID, 
+        vertexai=True,  
+        project="agenticaiprep",
+        location="us-central1", 
         temperature=0.3,
         max_output_tokens=500,
         max_retries=2,
@@ -33,11 +32,10 @@ def agent_node(state: FinanceState):
 
     cfg = state.get("configurable", {}) if isinstance(state, dict) else {}
     user_id = cfg.get("user_id", DEFAULT_USER_ID)
-    thread_id = cfg.get("thread_id", DEFAULT_THREAD_ID)
     tz = cfg.get("tz", APP_TZ)
 
     config_sys = SystemMessage(
-        content=f"CONFIG: user_id={user_id}, thread_id={thread_id}, tz={tz}"
+        content=f"CONFIG: user_id={user_id}, tz={tz}"
     )
 
     messages = [SystemMessage(content=SYSTEM_PROMPT), config_sys] + state.get("messages", [])

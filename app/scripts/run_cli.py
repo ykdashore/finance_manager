@@ -1,6 +1,6 @@
 from langchain_core.messages import HumanMessage
-from app.graph import build_graph
-from app.config import DEFAULT_THREAD_ID, DEFAULT_USER_ID, APP_TZ
+from app.core.state_graph import build_graph
+from app.core.config import DEFAULT_THREAD_ID, DEFAULT_USER_ID, APP_TZ
 
 
 def main():
