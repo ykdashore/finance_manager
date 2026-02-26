@@ -1,0 +1,23 @@
+# Testing dependencies
+pytest
+pytest-cov
+pytest-asyncio
+pytest-mock
+
+# Code quality
+black
+flake8
+pylint
+mypy
+isort
+
+# Test utilities
+httpx
+
+# Existing dependencies (copy from requirements.txt)
+fastapi==0.128.7
+pydantic==2.12.5
+sqlalchemy==2.0.25
+pandas==3.0.0
+langchain-core==1.2.11
+langgraph==1.0.8
