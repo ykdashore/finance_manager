@@ -28,7 +28,7 @@ def get_graph():
 def send_message(request: ChatSchema):
     """
     Send a message to the finance manager agent.
-    
+
     The agent will process the message, extract expense info,
     categorize it, and may interact with tools for logging or analytics.
     """
@@ -46,13 +46,19 @@ def send_message(request: ChatSchema):
             "configurable": {
                 "user_id": request.user_id,
                 "thread_id": request.thread_id,
-                "tz": request.tz or APP_TZ
+                "tz": request.tz or APP_TZ,
             }
         }
 
         # Run the blocking invoke in a thread with a timeout to avoid indefinite hangs
-        logger.info("Invoking LangGraph agent for user %s thread %s", request.user_id, request.thread_id)
-        future = _executor.submit(app.invoke, {"messages": [HumanMessage(content=request.message)]}, config)
+        logger.info(
+            "Invoking LangGraph agent for user %s thread %s",
+            request.user_id,
+            request.thread_id,
+        )
+        future = _executor.submit(
+            app.invoke, {"messages": [HumanMessage(content=request.message)]}, config
+        )
         try:
             output = future.result(timeout=60)
         except concurrent.futures.TimeoutError:
@@ -61,32 +67,35 @@ def send_message(request: ChatSchema):
             raise HTTPException(status_code=504, detail="LLM request timed out")
         except Exception as e:
             logger.exception("Error during agent invoke: %s", e)
-            raise HTTPException(status_code=500, detail=f"Error processing message: {e}")
-        
+            raise HTTPException(
+                status_code=500, detail=f"Error processing message: {e}"
+            )
+
         last_msg = output["messages"][-1]
         response_content = getattr(last_msg, "content", str(last_msg))
-        
+
         if isinstance(response_content, list):
             text_parts = []
             for block in response_content:
-                if isinstance(block, dict) and block.get('type') == 'text':
-                    text_parts.append(block.get('text', ''))
+                if isinstance(block, dict) and block.get("type") == "text":
+                    text_parts.append(block.get("text", ""))
                 elif isinstance(block, str):
                     text_parts.append(block)
-            response_content = ' '.join(text_parts) if text_parts else str(response_content)
-        
+            response_content = (
+                " ".join(text_parts) if text_parts else str(response_content)
+            )
+
         return ChatResponseSchema(
             user_id=request.user_id,
             thread_id=request.thread_id,
             user_message=request.message,
             agent_response=response_content,
-            status="success"
+            status="success",
         )
-        
+
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Error processing message: {str(e)}"
+            status_code=500, detail=f"Error processing message: {str(e)}"
         )
 
 

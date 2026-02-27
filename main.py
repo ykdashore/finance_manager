@@ -25,13 +25,14 @@ async def lifespan(app: FastAPI):
     try:
         # Initialize database on startup
         from app.tools.store import init_db
+
         init_db()
         logger.info("Database initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
-    
+
     yield
-    
+
     logger.info("Finance Manager API shutting down...")
 
 
@@ -40,7 +41,7 @@ app = FastAPI(
     title="Finance Manager API",
     description="AI-powered personal finance manager using LangGraph and Gemini",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -70,8 +71,8 @@ def root():
         "endpoints": {
             "chat": "/api/chat/message",
             "weekly_report": "/api/analytics/weekly-report",
-            "health": "/docs"
-        }
+            "health": "/docs",
+        },
     }
 
 
@@ -80,20 +81,11 @@ def root():
 async def global_exception_handler(request, exc):
     """Handle uncaught exceptions"""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error"}
-    )
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     logger.info("Starting Finance Manager API server...")
-    uvicorn.run(
-        "main:app",
-        host="localhost",
-        port=8002,
-        reload=True,
-        log_level="info"
-    )
+    uvicorn.run("main:app", host="localhost", port=8002, reload=True, log_level="info")

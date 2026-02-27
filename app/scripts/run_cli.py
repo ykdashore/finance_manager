@@ -7,10 +7,10 @@ def main():
     app = build_graph()
 
     config = {
-        "configurable":{
+        "configurable": {
             "user_id": DEFAULT_USER_ID,
             "thread_id": DEFAULT_THREAD_ID,
-            "tz":APP_TZ
+            "tz": APP_TZ,
         }
     }
 
@@ -22,6 +22,7 @@ def main():
         out = app.invoke({"messages": [HumanMessage(content=text)]}, config=config)
         last_msg = out["messages"][-1]
         print("\nAgent: ", getattr(last_msg, "content", last_msg))
+
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,4 @@
-"""Shared pytest fixtures and configurations."""
 import pytest
-from datetime import datetime
-from zoneinfo import ZoneInfo
-from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -30,5 +26,5 @@ def sample_chat_request():
         "message": "I spent 500 on groceries yesterday",
         "user_id": "test_user",
         "thread_id": "test_thread",
-        "tz": "Asia/Kolkata"
+        "tz": "Asia/Kolkata",
     }
