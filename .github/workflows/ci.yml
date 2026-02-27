@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, feature/** ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Create virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt || true
+
+      - name: Verify dependencies
+        run: |
+          source venv/bin/activate
+          python app/scripts/check_dependencies.py
+
+      - name: Start server and smoke-test
+        run: |
+          source venv/bin/activate
+          uvicorn main:app --port 8000 &
+          sleep 5
+          curl --fail http://localhost:8000/

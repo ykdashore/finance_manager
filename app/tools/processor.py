@@ -8,7 +8,8 @@ import os
 import re
 from app.core.config import GOOGLE_APPLICATION_CREDENTIALS_PATH, LLM_ID
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
+if GOOGLE_APPLICATION_CREDENTIALS_PATH:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
 
 CATEGORIES = ["Fuel", "Groceries", "Food & Dining", "Transport", 
               "Shopping", "Bills", "Rent", "Health", "Travel", "Other"

@@ -10,19 +10,29 @@ REQUIRED_PACKAGES = {
     "langchain-core": "LangChain core",
     "langchain-google-genai": "Google Gemini integration",
     "langgraph": "Graph-based workflows",
-    "google-genai": "Google Generative AI",
     "python-dotenv": "Environment variables",
     "pandas": "Data analysis",
 }
 
 
 def check_package(package_name):
-    """Check if a package is installed."""
-    try:
-        __import__(package_name.replace("-", "_"))
-        return True
-    except ImportError:
-        return False
+    """
+    Check if a package is installed (tries common import names).
+    """
+    candidates = [
+        package_name,
+        package_name.replace("-", "_"),
+        package_name.split("-")[-1],
+    ]
+
+    for name in candidates:
+        try:
+            __import__(name)
+            return True
+        except ImportError:
+            continue
+
+    return False
 
 
 def main():

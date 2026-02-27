@@ -12,7 +12,8 @@ from app.tools.store import init_db
 from app.core.config import *
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
+if GOOGLE_APPLICATION_CREDENTIALS_PATH:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
 
 
 def _agent_model():
