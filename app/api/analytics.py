@@ -5,14 +5,15 @@ from app.core.config import APP_TZ
 
 router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 
+
 @router.get("/weekly-report", response_model=WeeklyReportResponseSchema)
 def get_weekly_report(
     user_id: str = Query(..., description="User ID"),
-    tz: str = Query(APP_TZ, description="Timezone (e.g., Asia/Kolkata)")
+    tz: str = Query(APP_TZ, description="Timezone (e.g., Asia/Kolkata)"),
 ):
     """
     Generate a weekly expense report for the user.
-    
+
     Returns:
     - Total spending for the week
     - Breakdown by category
@@ -25,8 +26,7 @@ def get_weekly_report(
         return WeeklyReportResponseSchema(**report)
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Error generating weekly report: {str(e)}"
+            status_code=500, detail=f"Error generating weekly report: {str(e)}"
         )
 
 

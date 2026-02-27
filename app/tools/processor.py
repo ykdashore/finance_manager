@@ -11,16 +11,26 @@ from app.core.config import GOOGLE_APPLICATION_CREDENTIALS_PATH, LLM_ID
 if GOOGLE_APPLICATION_CREDENTIALS_PATH:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
 
-CATEGORIES = ["Fuel", "Groceries", "Food & Dining", "Transport", 
-              "Shopping", "Bills", "Rent", "Health", "Travel", "Other"
+CATEGORIES = [
+    "Fuel",
+    "Groceries",
+    "Food & Dining",
+    "Transport",
+    "Shopping",
+    "Bills",
+    "Rent",
+    "Health",
+    "Travel",
+    "Other",
 ]
+
 
 def get_llm():
     return ChatGoogleGenerativeAI(
-        model=LLM_ID, 
-        vertexai=True,           
-        project="agenticaiprep", 
-        location="us-central1",  
+        model=LLM_ID,
+        vertexai=True,
+        project="agenticaiprep",
+        location="us-central1",
         temperature=0.3,
         max_output_tokens=500,
         max_retries=2,
@@ -28,53 +38,63 @@ def get_llm():
 
 
 class ProcessedExpense(BaseModel):
-
     amount: float = Field(..., gt=0)
     currency: Literal["INR"] = "INR"
-    ts: str = Field(..., description="ISO-8601 timestamp in local timezone, include offset")
-    merchant: Optional[str] = Field(None, description="Merchant if explicitly mentioned (e.g., HP, Amazon)")
-    description: str = Field(..., description="Short description like 'petrol', 'lunch'")
+    ts: str = Field(
+        ..., description="ISO-8601 timestamp in local timezone, include offset"
+    )
+    merchant: Optional[str] = Field(
+        None, description="Merchant if explicitly mentioned (e.g., HP, Amazon)"
+    )
+    description: str = Field(
+        ..., description="Short description like 'petrol', 'lunch'"
+    )
     notes: Optional[str] = None
     is_ambiguous: bool = False
     clarification_question: Optional[str] = None
-    
+
     # Categorization fields
     category: str = Field(..., description=f"One of: {CATEGORIES}")
-    category_confidence: float = Field(..., ge=0, le=1, description="Confidence score for category assignment")
-    
+    category_confidence: float = Field(
+        ..., ge=0, le=1, description="Confidence score for category assignment"
+    )
+
     # When the expense was made (YYYY-MM-DDTHH:MM:SS±HH:MM with complete timezone offset)
-    created_at: datetime = Field(..., description="ISO-8601 datetime when expense was made, with complete timezone offset (e.g., 2026-02-25T12:00:00+05:30)")
-    
-    @field_validator('created_at', mode='before')
+    created_at: datetime = Field(
+        ...,
+        description="ISO-8601 datetime when expense was made, with complete timezone offset (e.g., 2026-02-25T12:00:00+05:30)",
+    )
+
+    @field_validator("created_at", mode="before")
     @classmethod
     def fix_malformed_datetime(cls, v):
         """Fix malformed datetime strings from LLM output"""
         if isinstance(v, str):
             # Pattern: incomplete datetime like "2026-02-24T12:" or "2026-02-24T12:3" etc.
             # Complete with :00:00+05:30 if missing minutes/seconds/timezone
-            match = re.match(r'^(\d{4}-\d{2}-\d{2}T\d{2}):?(\d{0,2})?:?(\d{0,2})?([+-]\d{2}:?\d{0,2})?(.*)$', v)
+            match = re.match(
+                r"^(\d{4}-\d{2}-\d{2}T\d{2}):?(\d{0,2})?:?(\d{0,2})?([+-]\d{2}:?\d{0,2})?(.*)$",
+                v,
+            )
             if match:
                 date_time, minutes, seconds, tz_offset, extra = match.groups()
-                
+
                 # Reconstruct with defaults
-                minutes = minutes if minutes else '00'
-                seconds = seconds if seconds else '00'
-                
+                minutes = minutes if minutes else "00"
+                seconds = seconds if seconds else "00"
+
                 if tz_offset:
                     # Fix incomplete timezone like +05:3 to +05:30
                     if len(tz_offset) < 6:  # +05:3, +05, etc.
-                        tz_offset = re.sub(r'([+-]\d{2}):?(\d)?$', r'\1:0\2', tz_offset)
+                        tz_offset = re.sub(r"([+-]\d{2}):?(\d)?$", r"\1:0\2", tz_offset)
                 else:
-                    tz_offset = '+05:30'  # Default to India timezone
-                
+                    tz_offset = "+05:30"  # Default to India timezone
+
                 v = f"{date_time}:{minutes}:{seconds}{tz_offset}"
-            
-            # Ensure colon in timezone offset (e.g., +0530 -> +05:30)
-            v = re.sub(r'([+-]\d{2})(\d{2})$', r'\1:\2', v)
-        
+
+            v = re.sub(r"([+-]\d{2})(\d{2})$", r"\1:\2", v)
+
         return v
-
-
 
 
 @tool
@@ -105,7 +125,7 @@ def process_expense(text: str, tz: str = "Asia/Kolkata") -> dict:
     
     Text: {text}
     """
-    
+
     out = llm.with_structured_output(ProcessedExpense).invoke(prompt)
     resp = out.model_dump()
     print("Processed expense output:", resp)

@@ -1,0 +1,13 @@
+# Ruff configuration
+exclude = [
+    "venv",
+    ".venv",
+    "__pycache__",
+    ".git",
+    "_pytest",
+]
+
+line-length = 88
+
+# optionally, ignore some rules
+# ignore = ["E501", "W503"]

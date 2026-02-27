@@ -1,4 +1,5 @@
 """Tests for Pydantic schemas validation."""
+
 import pytest
 from pydantic import ValidationError
 
@@ -14,7 +15,7 @@ class TestChatSchema:
             "message": "I spent 500 on groceries",
             "user_id": "user123",
             "thread_id": "thread456",
-            "tz": "Asia/Kolkata"
+            "tz": "Asia/Kolkata",
         }
         schema = ChatSchema(**data)
         assert schema.message == "I spent 500 on groceries"
@@ -27,11 +28,7 @@ class TestChatSchema:
 
     def test_timezone_optional(self):
         """Test that timezone is optional."""
-        data = {
-            "message": "test",
-            "user_id": "user123",
-            "thread_id": "thread456"
-        }
+        data = {"message": "test", "user_id": "user123", "thread_id": "thread456"}
         schema = ChatSchema(**data)
         assert schema.tz is None
 
@@ -45,7 +42,7 @@ class TestChatResponseSchema:
             "user_id": "user123",
             "thread_id": "thread456",
             "user_message": "I spent money",
-            "agent_response": "Logged: ₹500 on groceries"
+            "agent_response": "Logged: ₹500 on groceries",
         }
         schema = ChatResponseSchema(**data)
         assert schema.status == "success"  # Default
@@ -57,7 +54,7 @@ class TestChatResponseSchema:
             "user_id": "user123",
             "thread_id": "thread456",
             "user_message": "test",
-            "agent_response": {"invalid": "dict"}
+            "agent_response": {"invalid": "dict"},
         }
         with pytest.raises(ValidationError):
             ChatResponseSchema(**data)

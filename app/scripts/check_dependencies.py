@@ -1,6 +1,4 @@
 import sys
-import subprocess
-
 
 REQUIRED_PACKAGES = {
     "fastapi": "FastAPI web framework",
@@ -36,13 +34,13 @@ def check_package(package_name):
 
 
 def main():
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("DEPENDENCY VERIFICATION")
-    print("="*60 + "\n")
-    
+    print("=" * 60 + "\n")
+
     missing = []
     found = []
-    
+
     for package, description in REQUIRED_PACKAGES.items():
         if check_package(package):
             found.append(package)
@@ -50,14 +48,14 @@ def main():
         else:
             missing.append(package)
             print(f"{package:25} {description}")
-    
-    print("\n" + "="*60)
-    
+
+    print("\n" + "=" * 60)
+
     if missing:
         print(f"\nMissing {len(missing)} package(s):\n")
         for pkg in missing:
             print(f"   - {pkg}")
-        
+
         print("\nInstall missing packages:\n")
         print(f"   pip install {' '.join(missing)}\n")
         return 1

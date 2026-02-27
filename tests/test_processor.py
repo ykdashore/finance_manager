@@ -1,4 +1,5 @@
 """Tests for expense processing and categorization."""
+
 import pytest
 from pydantic import ValidationError
 
@@ -31,7 +32,7 @@ class TestProcessedExpense:
         """Test that malformed datetime +05:3 is fixed to +05:30."""
         sample_expense_data["created_at"] = "2026-02-25T12:00:00+05:3"
         expense = ProcessedExpense(**sample_expense_data)
-        # Should not raise error 
+        # Should not raise error
         assert expense.created_at is not None
 
     def test_incomplete_datetime_auto_fixed(self, sample_expense_data):
@@ -40,4 +41,3 @@ class TestProcessedExpense:
         expense = ProcessedExpense(**sample_expense_data)
         # Should not raise error
         assert expense.created_at is not None
-
