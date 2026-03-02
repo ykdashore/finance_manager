@@ -34,7 +34,7 @@ Create a `.env` file in the project root:
 
 ```env
 # Google Cloud
-GOOGLE_APPLICATION_CREDENTIALS_PATH=path_to_json_key_file
+GOOGLE_APPLICATION_CREDENTIALS=path_to_json_key_file
 
 # Database
 DB_PATH=expenses.db

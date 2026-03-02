@@ -5,9 +5,12 @@
 ```
 finance_manager/
 ├── main.py                          # FastAPI application entry point
-├── run_cli.py                       # CLI interface (alternative to API)
+├── dockerfile                       # Container
 ├── requirements.txt                 # Python dependencies
+├── requirements-dev.txt                 # Python dependencies
 ├── README.md                        # This file
+├── tests/                           # Test suite
+├── ui/                              # streamlit app
 ├── app/
 │   ├── __init__.py
 │   ├── api/                         # API routers

@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  finance_manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finance_manager
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env.docker
+
+    environment:
+      DB_PATH: /app/data/expenses.db
+      GRAPH_STATE_DB: /app/data/graph_state.db
+      GOOGLE_APPLICATION_CREDENTIALS: /app/credentials/gcp.json
+
+    volumes:
+      - sqlite_data:/app/data
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/credentials/gcp.json:ro
+
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
