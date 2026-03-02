@@ -88,4 +88,4 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info("Starting Finance Manager API server...")
-    uvicorn.run("main:app", host="localhost", port=8002, reload=True, log_level="info")
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True, log_level="info")

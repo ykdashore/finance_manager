@@ -4,12 +4,12 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
-import os
 import re
-from app.core.config import GOOGLE_APPLICATION_CREDENTIALS_PATH, LLM_ID
+from app.core.config import LLM_ID
 
-if GOOGLE_APPLICATION_CREDENTIALS_PATH:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS_PATH
+# import json
+# from langchain_core.messages import HumanMessage
+
 
 CATEGORIES = [
     "Fuel",
@@ -32,7 +32,7 @@ def get_llm():
         project="agenticaiprep",
         location="us-central1",
         temperature=0.3,
-        max_output_tokens=500,
+        max_output_tokens=5000,
         max_retries=2,
     )
 
@@ -128,5 +128,66 @@ def process_expense(text: str, tz: str = "Asia/Kolkata") -> dict:
 
     out = llm.with_structured_output(ProcessedExpense).invoke(prompt)
     resp = out.model_dump()
-    print("Processed expense output:", resp)
+
     return resp
+
+
+# @tool
+# def process_expense(text: str, tz: str = "Asia/Kolkata") -> dict:
+#     """
+#     Extract expense info AND categorize in a single call.
+#     Returns: amount, date, merchant, description, category, and confidence.
+#     """
+#     llm = get_llm()
+#     now = datetime.now(ZoneInfo(tz)).isoformat()
+
+#     schema = ProcessedExpense.model_json_schema()
+
+#     prompt = f"""You extract and categorize expense info from text in ONE STEP.
+
+# EXTRACTION RULES:
+# - Resolve relative dates like "yesterday", "today", "last Friday" using: NOW={now} and timezone {tz}.
+# - If date not specified, assume it's the current date in user's timezone.
+# - If time missing, set 12:00 local time.
+# - created_at MUST be ISO-8601 format with COMPLETE timezone offset: YYYY-MM-DDTHH:MM:SS+HH:MM (e.g., 2026-02-25T12:00:00+05:30)
+# - Merchant ONLY if clearly mentioned; else null.
+# - If amount missing or description unclear, set is_ambiguous=true and ask ONE clarification question.
+
+# CATEGORIZATION RULES:
+# - Classify into ONE category from: {CATEGORIES}
+# - Provide confidence score (0.0 to 1.0).
+
+# OUTPUT RULES (CRITICAL):
+# - Return ONLY a single raw JSON object.
+# - NO markdown, NO backticks, NO code fences, NO explanation.
+# - The JSON must include ALL required fields from this schema: {schema}
+
+# Text: {text}"""
+
+#     max_retries = 3
+#     last_error = None
+#     breakpoint()
+#     for attempt in range(max_retries):
+#         try:
+#             response = llm.invoke([HumanMessage(content=prompt)])
+#             raw = response.content.strip()
+
+#             raw = re.sub(r"^```(?:json)?\s*", "", raw)
+#             raw = re.sub(r"\s*```$", "", raw)
+#             raw = raw.strip()
+
+#             match = re.search(r"\{.*\}", raw, re.DOTALL)
+#             if not match:
+#                 raise ValueError(f"No JSON object found in response: {raw[:200]}")
+#             raw = match.group()
+
+#             data = json.loads(raw)
+#             expense = ProcessedExpense(**data)  # Pydantic validates + runs field_validators
+#             return expense.model_dump()
+
+#         except (json.JSONDecodeError, ValueError) as e:
+#             last_error = e
+#             prompt += f"\n\nATTEMPT {attempt + 1} FAILED: {str(e)}\nFix the error and return valid JSON only."
+#             continue
+
+#     raise ValueError(f"process_expense failed after {max_retries} attempts. Last error: {last_error}")
